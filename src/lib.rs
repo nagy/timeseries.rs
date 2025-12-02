@@ -6,7 +6,7 @@
 use chrono::DateTime;
 use std::fmt;
 use std::iter::FromIterator;
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign, Deref};
 
 use crate::index::DateTimeIndex;
 
@@ -33,6 +33,13 @@ pub struct TimeSeries {
 pub struct DataPoint {
     pub timestamp: i64,
     pub value: f64,
+}
+
+impl Deref for DataPoint {
+    type Target = f64;
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
 }
 
 impl From<(i64, f64)> for DataPoint {
@@ -536,5 +543,11 @@ mod tests {
         ts3 += dp3;
         ts3 += dp4;
         assert_eq!(ts3, ts_merged);
+    }
+
+    #[test]
+    fn test_deref() {
+        let dp1 = DataPoint::new(1, 123.45);
+        assert_eq!(*dp1, 123.45);
     }
 }
