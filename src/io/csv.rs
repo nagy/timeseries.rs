@@ -29,11 +29,9 @@ pub fn read<R: Read>(reader: R) -> Result<TimeSeries, Box<dyn Error>> {
             println!("{}", &datetime_format);
             println!(
                 "{:?}",
-                NaiveDateTime::parse_from_str(&record[0], datetime_format)
+                DateTime::parse_from_str(&record[0], datetime_format)
             );
-            let idx = NaiveDateTime::parse_from_str(&record[0], datetime_format)?
-                .and_utc()
-                .timestamp_millis();
+            let idx = DateTime::parse_from_str(&record[0], datetime_format)?.timestamp_millis();
             let v: f64 = record[1].parse::<f64>()?;
             index.push(idx);
             data.push(v);
