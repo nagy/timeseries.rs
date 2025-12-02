@@ -35,6 +35,15 @@ pub struct DataPoint {
     pub value: f64,
 }
 
+impl From<(i64, f64)> for DataPoint {
+    fn from(value: (i64, f64)) -> Self {
+        DataPoint {
+            timestamp: value.0,
+            value: value.1,
+        }
+    }
+}
+
 impl TimeSeries {
     /// Create empty Time Series
     ///
@@ -271,17 +280,13 @@ impl TimeSeries {
     }
 }
 
-impl Add<DataPoint> for TimeSeries {
+impl<T> Add<T> for TimeSeries
+where
+    T: Into<DataPoint>,
+{
     type Output = TimeSeries;
-    fn add(self, other: DataPoint) -> Self {
-        self.merge(&TimeSeries::from_datapoints(vec![other]))
-    }
-}
-
-impl Add<&DataPoint> for TimeSeries {
-    type Output = TimeSeries;
-    fn add(self, other: &DataPoint) -> Self {
-        self.merge(&TimeSeries::from_datapoints(vec![other.clone()]))
+    fn add(self, other: T) -> Self {
+        self.merge(&TimeSeries::from_datapoints(vec![other.into()]))
     }
 }
 
@@ -298,8 +303,11 @@ impl AddAssign for TimeSeries {
     }
 }
 
-impl AddAssign<DataPoint> for TimeSeries {
-    fn add_assign(&mut self, other: DataPoint) {
+impl<T> AddAssign<T> for TimeSeries
+where
+    T: Into<DataPoint>,
+{
+    fn add_assign(&mut self, other: T) {
         *self = (self.clone()) + other;
     }
 }
@@ -489,15 +497,15 @@ mod tests {
 
     #[test]
     fn test_add_ops() {
-        let dp1 = DataPoint::new(10, 1.0);
-        let dp2 = DataPoint::new(20, 2.5);
-        let dp3 = DataPoint::new(30, 3.5);
-        let dp4 = DataPoint::new(40, 4.5);
-        let ts1 = TimeSeries::from_datapoints(vec![dp1.clone(), dp2.clone()]);
-        let ts2 = TimeSeries::from_datapoints(vec![dp3.clone(), dp4.clone()]);
+        let dp1 = (10, 1.0);
+        let dp2 = (20, 2.5);
+        let dp3 = (30, 3.5);
+        let dp4 = (40, 4.5);
+        let ts1 = TimeSeries::from_datapoints(vec![dp1, dp2]);
+        let ts2 = TimeSeries::from_datapoints(vec![dp3, dp4]);
         let ts_merged = ts1.merge(&ts2);
         assert_eq!(ts1.clone() + ts2, ts_merged);
-        assert_eq!(ts1.clone() + dp3.clone() + dp4.clone(), ts_merged);
+        assert_eq!(ts1.clone() + dp3 + dp4, ts_merged);
 
         let mut ts3 = TimeSeries::from_datapoints(vec![dp1, dp2]);
         ts3 += dp3;
