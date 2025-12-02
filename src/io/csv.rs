@@ -3,7 +3,7 @@ use csv;
 use dtinfer;
 use serde::Serialize;
 use std::error::Error;
-use std::io::Read;
+use std::io::{Read, Write};
 
 use crate::TimeSeries;
 
@@ -47,20 +47,19 @@ fn timestamp_format(ts: i64, format: &str) -> String {
     dt.format(format).to_string()
 }
 
-/// Save series as CSV file
-pub fn write_to_file(
-    file_path: &str,
+/// Save series as CSV writer
+pub fn write<W: Write>(
+    writer: W,
     ts: &TimeSeries,
     datetime_format: &str,
 ) -> Result<(), Box<dyn Error>> {
-    let mut wtr = csv::Writer::from_path(file_path)?;
+    let mut wtr = csv::Writer::from_writer(writer);
     ts.iter()
         .map(|dp| Row {
             timestamp: timestamp_format(dp.timestamp, datetime_format),
             value: dp.value,
         })
         .for_each(|row| wtr.serialize(&row).unwrap());
-    wtr.flush()?;
     Ok(())
 }
 
