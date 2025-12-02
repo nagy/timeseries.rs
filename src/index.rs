@@ -68,8 +68,8 @@ impl DateTimeIndex {
     /// let vs = DateTimeIndex::new(vec![1, 2, 3, 4]);
     /// let xs = DateTimeIndex::new(vec![1, 2, 3, 3]);
     /// let ys = DateTimeIndex::new(vec![1, 2, 3, 2]);
-    /// assert!(vs.is_monotonic(), true);
-    /// assert!(xs.is_monotonic(), true);
+    /// assert!(vs.is_monotonic(), "{}", true);
+    /// assert!(xs.is_monotonic(), "{}", true);
     /// assert_eq!(ys.is_monotonic(), false);
     /// ```
     pub fn is_monotonic(&self) -> bool {

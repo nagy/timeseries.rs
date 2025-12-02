@@ -1,4 +1,4 @@
-use gnuplot::{Color, Figure};
+use gnuplot::{Color, Figure, RGBString};
 use std::env;
 
 use timeseries::io::csv;
@@ -9,6 +9,6 @@ fn main() {
 
     let mut fg = Figure::new();
     fg.axes2d()
-        .lines(&ts.index.values, &ts.values, &[Color("blue")]);
-    fg.show();
+        .lines(&ts.index.values, &ts.values, &[Color(RGBString("blue"))]);
+    fg.show().unwrap();
 }
