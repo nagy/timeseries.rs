@@ -28,10 +28,10 @@ pub fn read_from_file(file_path: &str) -> Result<TimeSeries, Box<dyn Error>> {
             println!("{}", &datetime_format);
             println!(
                 "{:?}",
-                NaiveDateTime::parse_from_str(&record[0], &datetime_format)
+                NaiveDateTime::parse_from_str(&record[0], datetime_format)
             );
             let idx =
-                NaiveDateTime::parse_from_str(&record[0], &datetime_format)?.timestamp_millis();
+                NaiveDateTime::parse_from_str(&record[0], datetime_format)?.timestamp_millis();
             let v: f64 = record[1].parse::<f64>()?;
             index.push(idx);
             data.push(v);

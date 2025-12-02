@@ -1,10 +1,9 @@
-use std::cmp;
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 use std::ops::Index;
 
 /// DateTimeIndex is represented as an array of timestamps (i64)
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DateTimeIndex {
     pub values: Vec<i64>,
 }
@@ -112,12 +111,6 @@ impl Index<usize> for DateTimeIndex {
 
     fn index(&self, pos: usize) -> &Self::Output {
         &self.values[pos]
-    }
-}
-
-impl cmp::PartialEq for DateTimeIndex {
-    fn eq(&self, other: &Self) -> bool {
-        self.values == other.values
     }
 }
 

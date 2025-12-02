@@ -5,7 +5,6 @@
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use std::cmp;
 use std::fmt;
 use std::iter::FromIterator;
 
@@ -17,7 +16,7 @@ pub mod io;
 /// Time Series with normalized data
 ///   * index - Index based on timestamp in millisecond resolution
 ///   * values - Data points
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct TimeSeries {
     pub index: DateTimeIndex,
     pub values: Vec<f64>,
@@ -26,7 +25,7 @@ pub struct TimeSeries {
 /// Single data point
 ///   * timestamp - Data point timestamp
 ///   * value - Data point value
-#[derive(Clone, Deserialize, Serialize, Debug)]
+#[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct DataPoint {
     pub timestamp: i64,
     pub value: f64,
@@ -222,7 +221,7 @@ impl TimeSeries {
     /// let data2 = vec![DataPoint::new(40, 41.0), DataPoint::new(45, 42.5), DataPoint::new(50, 53.2),
     ///                  DataPoint::new(55, 54.0), DataPoint::new(60, 63.0)];
     /// let expected = vec![DataPoint::new(10, 1.0), DataPoint::new(20, 2.5), DataPoint::new(30, 3.2),
-    ///                     DataPoint::new(40, 4.0), DataPoint::new(45, 42.5), DataPoint::new(50, 3.2),
+    ///                     DataPoint::new(40, 4.0), DataPoint::new(45, 42.5), DataPoint::new(50, 3.0),
     ///                     DataPoint::new(55, 54.0), DataPoint::new(60, 63.0)];
     /// let ts1 = TimeSeries::from_datapoints(data1);
     /// let ts2 = TimeSeries::from_datapoints(data2);
@@ -297,24 +296,18 @@ impl fmt::Display for TimeSeries {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fn write_record(f: &mut fmt::Formatter<'_>, r: DataPoint) {
             let naive_datetime = NaiveDateTime::from_timestamp(r.timestamp / 1000, 0);
-            let _ = write!(f, "({}, {})\n", naive_datetime, r.value);
+            let _ = writeln!(f, "({}, {})", naive_datetime, r.value);
         }
         if self.len() < 10 {
             self.iter().for_each(|dp| write_record(f, dp));
         } else {
             self.iter().take(5).for_each(|dp| write_record(f, dp));
-            let _ = write!(f, "...\n");
+            let _ = writeln!(f, "...");
             self.iter()
                 .skip(self.len() - 5)
                 .for_each(|dp| write_record(f, dp));
         }
-        write!(f, "\n")
-    }
-}
-
-impl cmp::PartialEq for TimeSeries {
-    fn eq(&self, other: &Self) -> bool {
-        self.index == other.index && self.values == self.values
+        writeln!(f)
     }
 }
 
@@ -344,12 +337,6 @@ impl ToSeries for DateTimeIndex {
 impl DataPoint {
     pub fn new(timestamp: i64, value: f64) -> DataPoint {
         DataPoint { timestamp, value }
-    }
-}
-
-impl cmp::PartialEq for DataPoint {
-    fn eq(&self, other: &Self) -> bool {
-        self.timestamp == other.timestamp && self.value == self.value
     }
 }
 
@@ -447,7 +434,7 @@ mod tests {
             DataPoint::new(30, 3.2),
             DataPoint::new(40, 4.0),
             DataPoint::new(45, 42.5),
-            DataPoint::new(50, 3.2),
+            DataPoint::new(50, 3.0),
             DataPoint::new(55, 54.0),
             DataPoint::new(60, 63.0),
         ];
