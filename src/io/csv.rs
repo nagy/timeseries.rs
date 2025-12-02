@@ -18,13 +18,13 @@ pub fn read<R: Read>(reader: R) -> Result<TimeSeries, Box<dyn Error>> {
     let mut rdr = csv::Reader::from_reader(reader);
     let mut index: Vec<i64> = Vec::new();
     let mut data: Vec<f64> = Vec::new();
-    let mut infered_format: Option<String> = None;
+    let mut inferred_format: Option<String> = None;
     for result in rdr.records() {
         let record = result?;
-        if infered_format.is_none() {
-            infered_format = dtinfer::infer_best(&record[0]);
+        if inferred_format.is_none() {
+            inferred_format = dtinfer::infer_best(&record[0]);
         }
-        if let Some(datetime_format) = &infered_format {
+        if let Some(datetime_format) = &inferred_format {
             println!("[{}]", &record[0]);
             println!("{}", &datetime_format);
             println!(

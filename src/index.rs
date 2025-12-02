@@ -10,7 +10,7 @@ pub struct DateTimeIndex {
 
 impl DateTimeIndex {
     /// Create new index from the timestamps
-    /// the index will olny be created from incresing values
+    /// the index will only be created from increasing values
     ///
     /// # Example
     ///
