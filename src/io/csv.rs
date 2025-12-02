@@ -31,8 +31,9 @@ pub fn read<R: Read>(reader: R) -> Result<TimeSeries, Box<dyn Error>> {
                 "{:?}",
                 NaiveDateTime::parse_from_str(&record[0], datetime_format)
             );
-            let idx =
-                NaiveDateTime::parse_from_str(&record[0], datetime_format)?.timestamp_millis();
+            let idx = NaiveDateTime::parse_from_str(&record[0], datetime_format)?
+                .and_utc()
+                .timestamp_millis();
             let v: f64 = record[1].parse::<f64>()?;
             index.push(idx);
             data.push(v);
@@ -43,7 +44,7 @@ pub fn read<R: Read>(reader: R) -> Result<TimeSeries, Box<dyn Error>> {
 }
 
 fn timestamp_format(ts: i64, format: &str) -> String {
-    let dt = Utc.timestamp(ts / 1000, 0);
+    let dt = Utc.timestamp_opt(ts / 1000, 0).unwrap();
     dt.format(format).to_string()
 }
 

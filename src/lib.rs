@@ -3,7 +3,7 @@
 //! Process Time Series in memory
 //!
 
-use chrono::NaiveDateTime;
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::FromIterator;
@@ -295,8 +295,8 @@ impl FromIterator<DataPoint> for TimeSeries {
 impl fmt::Display for TimeSeries {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fn write_record(f: &mut fmt::Formatter<'_>, r: DataPoint) {
-            let naive_datetime = NaiveDateTime::from_timestamp(r.timestamp / 1000, 0);
-            let _ = writeln!(f, "({}, {})", naive_datetime, r.value);
+            let datetime = DateTime::from_timestamp(r.timestamp / 1000, 0).unwrap();
+            let _ = writeln!(f, "({}, {})", datetime, r.value);
         }
         if self.len() < 10 {
             self.iter().for_each(|dp| write_record(f, dp));
