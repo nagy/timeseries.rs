@@ -59,19 +59,13 @@ impl TimeSeries {
     /// let ts = TimeSeries::new(index, data);
     /// assert_eq!(ts.len(), 5);
     /// ```
-    pub fn new(index: Vec<i64>, values: Vec<f64>) -> TimeSeries {
+    pub fn new(index: Vec<i64>, mut values: Vec<f64>) -> TimeSeries {
         if index.len() != values.len() {
-            let mut vs = values;
-            vs.resize(index.len(), 0.0);
-            TimeSeries {
-                index: DateTimeIndex::new(index),
-                values: vs,
-            }
-        } else {
-            TimeSeries {
-                index: DateTimeIndex::new(index),
-                values,
-            }
+            values.resize(index.len(), 0.0);
+        }
+        TimeSeries {
+            index: DateTimeIndex::new(index),
+            values,
         }
     }
 
