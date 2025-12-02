@@ -1,8 +1,7 @@
-use std::ops::Index;
 use std::cmp;
+use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
-use std::collections::{HashSet, HashMap};
-
+use std::ops::Index;
 
 /// DateTimeIndex is represented as an array of timestamps (i64)
 #[derive(Clone, Debug)]
@@ -11,10 +10,9 @@ pub struct DateTimeIndex {
 }
 
 impl DateTimeIndex {
-
     /// Create new index from the timestamps
     /// the index will olny be created from incresing values
-    /// 
+    ///
     /// # Example
     ///
     /// ```
@@ -30,21 +28,23 @@ impl DateTimeIndex {
 
     /// Infer index sample rate
     /// Sample rate is calculate as mode from the list of time differences.
-    /// 
-    /// # Example 
-    /// 
+    ///
+    /// # Example
+    ///
     /// ```
     /// use timeseries::index::DateTimeIndex;
-    /// 
+    ///
     /// let index = DateTimeIndex::new(vec![0, 10, 15, 20, 25, 27]);
     /// assert_eq!(index.infer_sample_rate(), 5);
     pub fn infer_sample_rate(&self) -> i64 {
         let mut occurrences: HashMap<i64, i64> = HashMap::new();
         let mut max: (i64, i64) = (0, 0);
 
-        self.values.iter().zip(self.values.iter().skip(1))
-            .map(|(x,y)| y-x)
-            .for_each(|dt|{
+        self.values
+            .iter()
+            .zip(self.values.iter().skip(1))
+            .map(|(x, y)| y - x)
+            .for_each(|dt| {
                 let count = occurrences.entry(dt).or_insert(0);
                 *count += 1;
             });
@@ -57,14 +57,14 @@ impl DateTimeIndex {
 
         max.0
     }
-    
+
     /// Check if index is monotonic increasing
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use timeseries::index::DateTimeIndex;
-    /// 
+    ///
     /// let vs = DateTimeIndex::new(vec![1, 2, 3, 4]);
     /// let xs = DateTimeIndex::new(vec![1, 2, 3, 3]);
     /// let ys = DateTimeIndex::new(vec![1, 2, 3, 2]);
@@ -73,17 +73,19 @@ impl DateTimeIndex {
     /// assert_eq!(ys.is_monotonic(), false);
     /// ```
     pub fn is_monotonic(&self) -> bool {
-        self.values.iter().zip(self.values.iter().skip(1))
-            .all(|(x,y)| x <= y)
+        self.values
+            .iter()
+            .zip(self.values.iter().skip(1))
+            .all(|(x, y)| x <= y)
     }
 
-   /// Check if index is monotonic increasing
-    /// 
+    /// Check if index is monotonic increasing
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use timeseries::index::DateTimeIndex;
-    /// 
+    ///
     /// let xs = DateTimeIndex::new(vec![1, 2, 3, 4]);
     /// let ys = DateTimeIndex::new(vec![1, 2, 3, 2]);
     /// assert!(xs.is_unique());
@@ -95,16 +97,15 @@ impl DateTimeIndex {
     }
 
     /// Create iterator
-    pub fn iter(&self) -> std::slice::Iter<i64> {
+    pub fn iter(&self) -> std::slice::Iter<'_, i64> {
         self.values.iter()
     }
-    
+
     /// Index length
     pub fn len(&self) -> usize {
         self.values.len()
     }
 }
-
 
 impl Index<usize> for DateTimeIndex {
     type Output = i64;
@@ -115,12 +116,10 @@ impl Index<usize> for DateTimeIndex {
 }
 
 impl cmp::PartialEq for DateTimeIndex {
-
     fn eq(&self, other: &Self) -> bool {
         self.values == other.values
     }
 }
-
 
 /// ------------------------------------------------------------------------------------------------
 /// Module unit tests
@@ -147,5 +146,4 @@ mod tests {
         let index = DateTimeIndex::new(vec![1]);
         assert!(index.is_monotonic());
     }
-
 }
