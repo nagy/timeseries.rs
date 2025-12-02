@@ -6,6 +6,7 @@
 use chrono::DateTime;
 use std::fmt;
 use std::iter::FromIterator;
+use std::ops::{Add, AddAssign};
 
 use crate::index::DateTimeIndex;
 
@@ -259,6 +260,39 @@ impl TimeSeries {
     }
 }
 
+impl Add<DataPoint> for TimeSeries {
+    type Output = TimeSeries;
+    fn add(self, other: DataPoint) -> Self {
+        self.merge(&TimeSeries::from_datapoints(vec![other]))
+    }
+}
+
+impl Add<&DataPoint> for TimeSeries {
+    type Output = TimeSeries;
+    fn add(self, other: &DataPoint) -> Self {
+        self.merge(&TimeSeries::from_datapoints(vec![other.clone()]))
+    }
+}
+
+impl Add for TimeSeries {
+    type Output = TimeSeries;
+    fn add(self, other: Self) -> Self {
+        self.merge(&other)
+    }
+}
+
+impl AddAssign for TimeSeries {
+    fn add_assign(&mut self, other: Self) {
+        *self = (self.clone()) + other;
+    }
+}
+
+impl AddAssign<DataPoint> for TimeSeries {
+    fn add_assign(&mut self, other: DataPoint) {
+        *self = (self.clone()) + other;
+    }
+}
+
 pub struct TimeSeriesIter<'a> {
     ts: &'a TimeSeries,
     index: usize,
@@ -440,5 +474,23 @@ mod tests {
         let ts_expected = TimeSeries::from_datapoints(expected);
         let ts_merged = ts1.merge(&ts2);
         assert_eq!(ts_merged, ts_expected);
+    }
+
+    #[test]
+    fn test_add_ops() {
+        let dp1 = DataPoint::new(10, 1.0);
+        let dp2 = DataPoint::new(20, 2.5);
+        let dp3 = DataPoint::new(30, 3.5);
+        let dp4 = DataPoint::new(40, 4.5);
+        let ts1 = TimeSeries::from_datapoints(vec![dp1.clone(), dp2.clone()]);
+        let ts2 = TimeSeries::from_datapoints(vec![dp3.clone(), dp4.clone()]);
+        let ts_merged = ts1.merge(&ts2);
+        assert_eq!(ts1.clone() + ts2, ts_merged);
+        assert_eq!(ts1.clone() + dp3.clone() + dp4.clone(), ts_merged);
+
+        let mut ts3 = TimeSeries::from_datapoints(vec![dp1, dp2]);
+        ts3 += dp3;
+        ts3 += dp4;
+        assert_eq!(ts3, ts_merged);
     }
 }
