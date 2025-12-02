@@ -3,6 +3,7 @@ use csv;
 use dtinfer;
 use serde::Serialize;
 use std::error::Error;
+use std::io::Read;
 
 use crate::TimeSeries;
 
@@ -12,9 +13,9 @@ struct Row {
     value: f64,
 }
 
-/// Load series from the given CSV file
-pub fn read_from_file(file_path: &str) -> Result<TimeSeries, Box<dyn Error>> {
-    let mut rdr = csv::Reader::from_path(file_path)?;
+/// Load series from the given CSV reader
+pub fn read<R: Read>(reader: R) -> Result<TimeSeries, Box<dyn Error>> {
+    let mut rdr = csv::Reader::from_reader(reader);
     let mut index: Vec<i64> = Vec::new();
     let mut data: Vec<f64> = Vec::new();
     let mut infered_format: Option<String> = None;
@@ -69,10 +70,12 @@ pub fn write_to_file(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
 
     #[test]
     fn test_read() {
-        let ts = read_from_file("testdata/rain.csv").unwrap();
+        let file = File::open("testdata/rain.csv").unwrap();
+        let ts = read(file).unwrap();
         assert_eq!(ts.len(), 96670);
     }
 }
