@@ -29,7 +29,7 @@ pub struct TimeSeries {
 ///   * value - Data point value
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
 pub struct DataPoint {
     pub timestamp: i64,
     pub value: f64,
@@ -88,16 +88,27 @@ impl TimeSeries {
     /// let ts = TimeSeries::from_datapoints(data);
     /// assert_eq!(ts.len(), 5);
     /// ```
-    pub fn from_datapoints(datapoints: Vec<DataPoint>) -> TimeSeries {
+    pub fn from_datapoints<T>(datapoints: Vec<T>) -> TimeSeries
+    where
+        T: Into<DataPoint> + Copy,
+    {
         let mut size = 1;
         for i in 1..datapoints.len() {
-            if datapoints[i].timestamp <= datapoints[i - 1].timestamp {
+            if datapoints[i].into().timestamp <= datapoints[i - 1].into().timestamp {
                 break;
             }
             size = i + 1;
         }
-        let index = datapoints.iter().take(size).map(|r| r.timestamp).collect();
-        let values = datapoints.iter().take(size).map(|r| r.value).collect();
+        let index = datapoints
+            .iter()
+            .take(size)
+            .map(|r| Into::<DataPoint>::into(*r).timestamp)
+            .collect();
+        let values = datapoints
+            .iter()
+            .take(size)
+            .map(|r| Into::<DataPoint>::into(*r).value)
+            .collect();
         TimeSeries {
             index: DateTimeIndex::new(index),
             values,
