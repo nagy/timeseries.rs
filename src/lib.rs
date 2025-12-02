@@ -312,6 +312,19 @@ where
     }
 }
 
+impl std::iter::Sum<DataPoint> for TimeSeries {
+    fn sum<I>(iter: I) -> Self
+    where
+        I: Iterator<Item = DataPoint>,
+    {
+        let mut ts = TimeSeries::default();
+        for dp in iter.into_iter() {
+            ts += dp
+        }
+        ts
+    }
+}
+
 pub struct TimeSeriesIter<'a> {
     ts: &'a TimeSeries,
     index: usize,
@@ -504,8 +517,19 @@ mod tests {
         let ts1 = TimeSeries::from_datapoints(vec![dp1, dp2]);
         let ts2 = TimeSeries::from_datapoints(vec![dp3, dp4]);
         let ts_merged = ts1.merge(&ts2);
-        assert_eq!(ts1.clone() + ts2, ts_merged);
+        assert_eq!(ts1.clone() + ts2.clone(), ts_merged);
         assert_eq!(ts1.clone() + dp3 + dp4, ts_merged);
+        assert_eq!(
+            vec![
+                DataPoint::new(10, 1.0),
+                DataPoint::new(20, 2.5),
+                DataPoint::new(30, 3.5),
+                DataPoint::new(40, 4.5),
+            ]
+            .into_iter()
+            .sum::<TimeSeries>(),
+            ts_merged
+        );
 
         let mut ts3 = TimeSeries::from_datapoints(vec![dp1, dp2]);
         ts3 += dp3;
