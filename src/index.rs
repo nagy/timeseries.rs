@@ -4,7 +4,7 @@ use std::iter::FromIterator;
 use std::ops::Index;
 
 /// DateTimeIndex is represented as an array of timestamps (i64)
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DateTimeIndex {
     pub values: Vec<i64>,
 }

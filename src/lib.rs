@@ -17,7 +17,7 @@ pub mod io;
 /// Time Series with normalized data
 ///   * index - Index based on timestamp in millisecond resolution
 ///   * values - Data points
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct TimeSeries {
     pub index: DateTimeIndex,
     pub values: Vec<f64>,
@@ -43,8 +43,9 @@ impl TimeSeries {
     /// let ts = TimeSeries::empty();
     /// assert_eq!(ts.len(), 0);
     /// ```
+    #[deprecated(note = "Use Default::default() instead")]
     pub fn empty() -> TimeSeries {
-        TimeSeries::new(vec![], vec![])
+        Default::default()
     }
 
     /// Create a new Time Series from from index and data
@@ -120,7 +121,7 @@ impl TimeSeries {
     /// ```
     pub fn diff(&self) -> TimeSeries {
         if self.len() < 2 {
-            TimeSeries::empty()
+            TimeSeries::default()
         } else {
             let index = self.index.values[1..].to_owned();
             let mut new_values = vec![0.0; self.len() - 1];
