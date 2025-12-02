@@ -4,13 +4,14 @@
 //!
 
 use chrono::DateTime;
-use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::iter::FromIterator;
 
 use crate::index::DateTimeIndex;
 
 pub mod index;
+
+#[cfg(feature = "serde")]
 pub mod io;
 
 /// Time Series with normalized data
@@ -25,7 +26,9 @@ pub struct TimeSeries {
 /// Single data point
 ///   * timestamp - Data point timestamp
 ///   * value - Data point value
-#[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize))]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct DataPoint {
     pub timestamp: i64,
     pub value: f64,
