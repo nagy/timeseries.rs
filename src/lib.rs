@@ -5,7 +5,6 @@
 
 use std::iter::FromIterator;
 use std::fmt;
-use std::cmp;
 use serde::{Deserialize, Serialize};
 use chrono::NaiveDateTime;
 
@@ -18,7 +17,7 @@ pub mod io;
 /// Time Series with normalized data
 ///   * index - Index based on timestamp in millisecond resolution
 ///   * values - Data points
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct TimeSeries {
     pub index: DateTimeIndex,
     pub values: Vec<f64>
@@ -27,7 +26,7 @@ pub struct TimeSeries {
 /// Single data point
 ///   * timestamp - Data point timestamp
 ///   * value - Data point value
-#[derive(Clone, Deserialize, Serialize, Debug)]
+#[derive(Clone, Deserialize, Serialize, Debug, PartialEq)]
 pub struct DataPoint {
     pub timestamp: i64,
     pub value: f64
@@ -216,7 +215,7 @@ impl TimeSeries {
     /// let data2 = vec![DataPoint::new(40, 41.0), DataPoint::new(45, 42.5), DataPoint::new(50, 53.2), 
     ///                  DataPoint::new(55, 54.0), DataPoint::new(60, 63.0)];
     /// let expected = vec![DataPoint::new(10, 1.0), DataPoint::new(20, 2.5), DataPoint::new(30, 3.2), 
-    ///                     DataPoint::new(40, 4.0), DataPoint::new(45, 42.5), DataPoint::new(50, 3.2), 
+    ///                     DataPoint::new(40, 4.0), DataPoint::new(45, 42.5), DataPoint::new(50, 3.0),
     ///                     DataPoint::new(55, 54.0), DataPoint::new(60, 63.0)];
     /// let ts1 = TimeSeries::from_datapoints(data1);
     /// let ts2 = TimeSeries::from_datapoints(data2);
@@ -302,13 +301,6 @@ impl fmt::Display for TimeSeries {
     }
 }
 
-impl cmp::PartialEq for TimeSeries {
-
-    fn eq(&self, other: &Self) -> bool {
-        self.index == other.index && self.values == self.values
-    }
-}
-
 pub trait ToSeries {
     fn to_series(&self) -> TimeSeries;
 }
@@ -338,14 +330,6 @@ impl DataPoint {
         DataPoint { timestamp, value }
     }
 }
-
-impl cmp::PartialEq for DataPoint {
-
-    fn eq(&self, other: &Self) -> bool {
-        self.timestamp == other.timestamp && self.value == self.value
-    }
-}
-
 
 /// ------------------------------------------------------------------------------------------------
 /// Module unit tests
@@ -409,7 +393,7 @@ mod tests {
         let data2 = vec![DataPoint::new(40, 41.0), DataPoint::new(45, 42.5), DataPoint::new(50, 53.2), 
                          DataPoint::new(55, 54.0), DataPoint::new(60, 63.0)];
         let expected = vec![DataPoint::new(10, 1.0), DataPoint::new(20, 2.5), DataPoint::new(30, 3.2), 
-                            DataPoint::new(40, 4.0), DataPoint::new(45, 42.5), DataPoint::new(50, 3.2), 
+                            DataPoint::new(40, 4.0), DataPoint::new(45, 42.5), DataPoint::new(50, 3.0),
                             DataPoint::new(55, 54.0), DataPoint::new(60, 63.0)];
         let ts1 = TimeSeries::from_datapoints(data1);
         let ts2 = TimeSeries::from_datapoints(data2);
