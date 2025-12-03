@@ -17,6 +17,7 @@ serde = { version = "1.0", features = ["derive"], optional = true }
 chrono = "0.4"
 csv = "1.4"
 dtinfer = "0.1"
+derive_more = { version = "2.1.0", features = ["constructor", "from"] }
 
 
 [features]

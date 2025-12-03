@@ -4,6 +4,7 @@
 //!
 
 use chrono::DateTime;
+use derive_more::{Constructor, From};
 use std::fmt;
 use std::iter::FromIterator;
 use std::ops::{Add, AddAssign, Deref};
@@ -29,7 +30,7 @@ pub struct TimeSeries {
 ///   * value - Data point value
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize))]
-#[derive(Copy, Clone, Debug, Default, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Constructor, From)]
 pub struct DataPoint {
     pub timestamp: i64,
     pub value: f64,
@@ -39,15 +40,6 @@ impl Deref for DataPoint {
     type Target = f64;
     fn deref(&self) -> &Self::Target {
         &self.value
-    }
-}
-
-impl From<(i64, f64)> for DataPoint {
-    fn from(value: (i64, f64)) -> Self {
-        DataPoint {
-            timestamp: value.0,
-            value: value.1,
-        }
     }
 }
 
@@ -287,20 +279,24 @@ impl TimeSeries {
     }
 }
 
-impl<T> Add<T> for TimeSeries
+impl<T> From<T> for TimeSeries
 where
     T: Into<DataPoint>,
 {
-    type Output = TimeSeries;
-    fn add(self, other: T) -> Self {
-        self.merge(&TimeSeries::from_datapoints(vec![other.into()]))
+    /// Construct a TimeSeries with a single entry.
+    fn from(value: T) -> Self {
+        TimeSeries::from_datapoints(vec![value.into()])
     }
 }
 
-impl Add for TimeSeries {
+impl<T> Add<T> for TimeSeries
+where
+    T: Into<TimeSeries>,
+{
     type Output = TimeSeries;
-    fn add(self, other: Self) -> Self {
-        self.merge(&other)
+    fn add(self, other: T) -> Self {
+        let ts = other.into();
+        self.merge(&ts)
     }
 }
 
@@ -407,12 +403,6 @@ impl ToSeries for DateTimeIndex {
     fn to_series(&self) -> TimeSeries {
         let data = self.values.iter().map(|&v| v as f64).collect();
         TimeSeries::new(self.values.to_owned(), data)
-    }
-}
-
-impl DataPoint {
-    pub fn new(timestamp: i64, value: f64) -> DataPoint {
-        DataPoint { timestamp, value }
     }
 }
 
@@ -549,5 +539,12 @@ mod tests {
     fn test_deref() {
         let dp1 = DataPoint::new(1, 123.45);
         assert_eq!(*dp1, 123.45);
+    }
+
+    #[test]
+    fn test_into() {
+        let dp1 = DataPoint::new(1, 123.45);
+        let ts1: TimeSeries = dp1.into();
+        assert_eq!(ts1, TimeSeries::from_datapoints(vec![dp1]));
     }
 }
